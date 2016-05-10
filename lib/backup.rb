@@ -71,9 +71,7 @@ case command
     puts directory_parser.files.map {|file| file[:name]}
   when 'delete'
     if options[:dryrun]
-      directory_parser.files.each do |file|
-        puts file[:name] if file[:age_in_days] > options[:keep_in_days]
-      end
+      puts directory_parser.days_ago(options[:keep_in_days]).map {|file| file[:filename]}
     else
 
     end

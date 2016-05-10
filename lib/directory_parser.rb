@@ -13,7 +13,7 @@ class DirectoryParser
   def files
     files = []
     Dir.foreach(@directory) do |item|
-      next if item == '.' or item == '..' or item.start_with? '.'
+      next if item == '.' or item == '..' or item.start_with? '.' or Dir.exists?(File.join(@directory, item))
   
       begin
         save_date = Date.parse(item)

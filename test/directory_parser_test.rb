@@ -152,4 +152,12 @@ class DirectoryParserTest < Minitest::Test
       assert_equal 2, file[:age_in_days] if file[:filename] == 'phpmyadmin-08.05.2016_13:10:02.tar.gz'
     end
   end
+
+  def test_no_directories
+    test_directory = TestUtils.create_directory
+    Dir.mkdir(File.join(test_directory, "#{SecureRandom.hex}-02.05.2016"))
+    parser = DirectoryParser.new(test_directory)
+
+    assert_equal 0, parser.count
+  end
 end
