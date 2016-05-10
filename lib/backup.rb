@@ -4,35 +4,7 @@ require 'optparse'
 require 'ostruct'
 require 'date'
 
-class DirectoryParser
-  def initialize(directory)
-    @directory = directory
-  end
-
-  def files
-    files = []
-    Dir.foreach(@directory) do |item|
-      next if item == '.' or item == '..' or item.start_with? '.'
-  
-      begin
-        save_date = Date.parse(item)
-        files.push({
-          :name => item,
-          :date => save_date,
-          :age_in_days => (DateTime.now - save_date).to_i
-        })
-      rescue
-        next
-      end
-    end
-  
-    files
-  end
-
-  def count
-    files.count
-  end
-end
+require_relative 'directory_parser'
 
 options = OpenStruct.new
 options.days_to_keep = 30
