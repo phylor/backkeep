@@ -339,4 +339,40 @@ class DirectoryParserTest < Minitest::Test
       assert_equal 6, file[:age_in_days] if file[:filename] == 'mysql-2016-05-06_00:41:49.gz'
     end
   end
+
+  def test_missing_age
+    parser = DirectoryParser.new('/tmp', Date.parse('10.05.2016'))
+
+    filenames = File.open('test/bug-age-missing').read
+    filenames.each_line do |filename|
+      age = parser.age_in_days(parser.date_of_filename(filename))
+      assert (8..11).include? age
+    end
+  end
+
+  def test_missing_age_all_items
+    filenames = []
+
+    filenames_as_text = File.open('test/bug-age-missing-all-items').read
+    filenames_as_text.each_line do |filename|
+      filenames.push(filename)
+    end
+
+    parser = DirectoryParser.new(filenames, Date.parse('10.05.2016'))
+
+    assert_equal 1261, parser.files.count
+  end
+
+  def test_missing_age_all_items_removable
+    filenames = []
+
+    filenames_as_text = File.open('test/bug-age-missing-all-items').read
+    filenames_as_text.each_line do |filename|
+      filenames.push(filename)
+    end
+
+    parser = DirectoryParser.new(filenames, Date.parse('14.05.2016'))
+
+    assert_equal 699, parser.removable_files_when_keeping_in_days(6).count
+  end
 end

@@ -2,25 +2,45 @@ require 'date'
 
 class DirectoryParser
   def initialize(directory, now=DateTime.now)
-    @directory = directory
+    @directory = directory if directory.kind_of? String
+    @filenames = directory if directory.kind_of? Array
     @now = now
 
-    if not Dir.exists? @directory
+    if @directory and not Dir.exists? @directory
       raise
     end
   end
 
-  def files
-    files = []
+  def date_of_filename(filename)
+    Date.parse(filename.gsub(/-(\d{4})/, '\1')) # Remove minus in front of years of american date formats
+  end
+
+  def age_in_days(date)
+    (@now - date).to_i
+  end
+
+  def load_filenames_from_directory
+    @filenames = []
+
     Dir.foreach(@directory) do |item|
       next if item == '.' or item == '..' or item.start_with? '.' or Dir.exists?(File.join(@directory, item))
   
+      @filenames << item
+    end
+  end
+
+  def files
+    load_filenames_from_directory if @directory
+
+    files = []
+
+    @filenames.each do |item|
       begin
-        save_date = Date.parse(item.gsub(/-(\d{4})/, '\1')) # Remove minus in front of years of american date formats
+        save_date = date_of_filename(item)
         files.push({
           :filename => item,
           :date => save_date,
-          :age_in_days => (@now - save_date).to_i
+          :age_in_days => age_in_days(save_date)
         })
       rescue
         next
