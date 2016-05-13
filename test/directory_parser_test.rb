@@ -309,4 +309,34 @@ class DirectoryParserTest < Minitest::Test
     assert files.include? 'phpmyadmin-03.05.2016_18:00:05.tar.gz'
     assert files.include? 'phpmyadmin-02.05.2016_09:59:02.tar.gz'
   end
+
+  def test_age_in_days_other_date_format
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'mysql-2016-05-12_15:34:45.gz',
+      'mysql-2016-05-04_17:34:34.gz',
+      'mysql-2016-05-01_22:17:36.gz',
+      'mysql-2016-05-09_13:46:36.gz',
+      'mysql-2016-05-03_13:25:21.gz',
+      'mysql-2016-04-30_22:28:15.gz',
+      'mysql-2016-05-06_00:41:49.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('12.05.2016'))
+
+    files = parser.files
+
+    assert_equal 7, files.count
+    files.each do |file|
+      assert_equal 0, file[:age_in_days] if file[:filename] == 'mysql-2016-05-12_15:34:45.gz'
+      assert_equal 8, file[:age_in_days] if file[:filename] == 'mysql-2016-05-04_17:34:34.gz'
+      assert_equal 11, file[:age_in_days] if file[:filename] == 'mysql-2016-05-01_22:17:36.gz'
+      assert_equal 3, file[:age_in_days] if file[:filename] == 'mysql-2016-05-09_13:46:36.gz'
+      assert_equal 9, file[:age_in_days] if file[:filename] == 'mysql-2016-05-03_13:25:21.gz'
+      assert_equal 12, file[:age_in_days] if file[:filename] == 'mysql-2016-04-30_22:28:15.gz'
+      assert_equal 6, file[:age_in_days] if file[:filename] == 'mysql-2016-05-06_00:41:49.gz'
+    end
+  end
 end

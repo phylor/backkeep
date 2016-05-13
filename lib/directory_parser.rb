@@ -16,7 +16,7 @@ class DirectoryParser
       next if item == '.' or item == '..' or item.start_with? '.' or Dir.exists?(File.join(@directory, item))
   
       begin
-        save_date = Date.parse(item)
+        save_date = Date.parse(item.gsub(/-(\d{4})/, '\1')) # Remove minus in front of years of american date formats
         files.push({
           :filename => item,
           :date => save_date,
