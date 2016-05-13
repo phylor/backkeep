@@ -16,6 +16,11 @@ Backkeep requires your backups to include a date and an optional time in their f
 - `backkeep diff`: lists all backups which are deleted by `backkeep remove`
 - `backkeep remove`: removes all outdated backups
 
+### Options
+
+- `--directory /backup/postgres`: specifies the directory to work on (default: current directory)
+- `--keep 10`: number of days to keep backups. In this example, all backups older than 10 days are deleted.
+
 ## Development
 
 Run tests:
