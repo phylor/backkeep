@@ -1,12 +1,14 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    gli (2.13.4)
     minitest (5.8.4)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  gli
   minitest
 
 BUNDLED WITH

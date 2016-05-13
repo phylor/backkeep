@@ -24,21 +24,36 @@ global = OptionParser.new do |opts|
 end
 
 commands = {
-  'count' => OptionParser.new do |opts|
-    opts.banner = 'Usage: count [OPTIONS]'
+  'list' => OptionParser.new do |opts|
+    opts.banner = 'Usage: list [OPTIONS]'
 
     opts.on('-d', '--directory [TEXT]', 'Directory to analyze') do |dir|
       options[:directory] = dir
     end
   end,
-  'ls' => OptionParser.new do |opts|
-    opts.banner = 'Usage: ls [OPTIONS]'
+  'keep' => OptionParser.new do |opts|
+    opts.banner = 'Usage: list [OPTIONS]'
 
     opts.on('-d', '--directory [TEXT]', 'Directory to analyze') do |dir|
       options[:directory] = dir
     end
+
+    opts.on('-k', '--keep [TEXT]', 'Days to keep backups around') do |days|
+      options[:keep_in_days] = days.to_i
+    end
   end,
-  'delete' => OptionParser.new do |opts|
+  'diff' => OptionParser.new do |opts|
+    opts.banner = 'Usage: diff [OPTIONS]'
+
+    opts.on('-d', '--directory [TEXT]', 'Directory to analyze') do |dir|
+      options[:directory] = dir
+    end
+
+    opts.on('-k', '--keep [TEXT]', 'Days to keep backups around') do |days|
+      options[:keep_in_days] = days.to_i
+    end
+  end,
+  'remove' => OptionParser.new do |opts|
     opts.banner = 'Usage: delete [OPTIONS]'
 
     opts.on('-x', '--dry-run', 'Show what would be deleted, but do not delete anything') do |dr|
@@ -63,16 +78,16 @@ directory = options[:directory] || '.'
 directory_parser = DirectoryParser.new(directory)
 
 case command
-  when 'count' 
-    puts "#{directory_parser.count} backups found in #{directory}."
-  when 'ls'
-    puts "Analyzing directory #{directory}"
-
-    puts directory_parser.files.map {|file| file[:name]}
-  when 'delete'
+  when 'list'
+    puts directory_parser.files.map {|file| file[:filename]}
+  when 'keep'
+    puts directory_parser.days_ago(options[:keep_in_days]).map {|file| file[:filename]}
+  when 'diff'
+    puts directory_parser.removable_files_when_keeping_in_days(options[:keep_in_days]).map {|file| file[:filename]}
+  when 'remove'
     if options[:dryrun]
-      puts directory_parser.days_ago(options[:keep_in_days]).map {|file| file[:filename]}
+      puts directory_parser.removable_files_when_keeping_in_days(options[:keep_in_days]).map {|file| file[:filename]}
     else
-
+      directory_parser.remove_and_keep_days_ago(options[:keep_in_days])
     end
 end

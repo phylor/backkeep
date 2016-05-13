@@ -160,4 +160,153 @@ class DirectoryParserTest < Minitest::Test
 
     assert_equal 0, parser.count
   end
+
+  def test_days_ago_zero_days
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'phpmyadmin-02.05.2016_08:10:02.tar.gz',
+      'phpmyadmin-03.05.2016_18:00:05.tar.gz',
+      'phpmyadmin-02.05.2016_09:59:02.tar.gz',
+      'phpmyadmin-08.05.2016_13:10:02.tar.gz',
+      'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('10.05.2016'))
+
+    files = parser.days_ago(0)
+
+    assert_equal 1, files.count
+  end
+
+  def test_remove_days_ago_all
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'phpmyadmin-02.05.2016_08:10:02.tar.gz',
+      'phpmyadmin-03.05.2016_18:00:05.tar.gz',
+      'phpmyadmin-02.05.2016_09:59:02.tar.gz',
+      'phpmyadmin-08.05.2016_13:10:02.tar.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('10.05.2016'))
+
+    parser.remove_and_keep_days_ago(0)
+
+    assert_equal 2, Dir[File.join(test_directory, '**', '*')].count {|file| File.file?(file) }
+  end
+
+  def test_remove_days_ago_all_but_today
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'phpmyadmin-02.05.2016_08:10:02.tar.gz',
+      'phpmyadmin-03.05.2016_18:00:05.tar.gz',
+      'phpmyadmin-02.05.2016_09:59:02.tar.gz',
+      'phpmyadmin-08.05.2016_13:10:02.tar.gz',
+      'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('10.05.2016'))
+
+    parser.remove_and_keep_days_ago(0)
+
+    assert_equal 3, Dir[File.join(test_directory, '**', '*')].count {|file| File.file?(file) }
+    assert File.exists?(File.join(test_directory, 'phpmyadmin-README'))
+    assert File.exists?(File.join(test_directory, 'phpmyadmin-install'))
+    assert File.exists?(File.join(test_directory, 'phpmyadmin-10.05.2016_13:10:02.tar.gz'))
+  end
+
+  def test_remove_days_ago_some_left
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'phpmyadmin-02.05.2016_08:10:02.tar.gz',
+      'phpmyadmin-03.05.2016_18:00:05.tar.gz',
+      'phpmyadmin-02.05.2016_09:59:02.tar.gz',
+      'phpmyadmin-08.05.2016_13:10:02.tar.gz',
+      'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('10.05.2016'))
+
+    parser.remove_and_keep_days_ago(3)
+
+    assert_equal 4, Dir[File.join(test_directory, '**', '*')].count {|file| File.file?(file) }
+    assert File.exists?(File.join(test_directory, 'phpmyadmin-README'))
+    assert File.exists?(File.join(test_directory, 'phpmyadmin-install'))
+    assert File.exists?(File.join(test_directory, 'phpmyadmin-08.05.2016_13:10:02.tar.gz'))
+    assert File.exists?(File.join(test_directory, 'phpmyadmin-10.05.2016_13:10:02.tar.gz'))
+  end
+
+  def test_removed_files_days_ago_all
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'phpmyadmin-02.05.2016_08:10:02.tar.gz',
+      'phpmyadmin-03.05.2016_18:00:05.tar.gz',
+      'phpmyadmin-02.05.2016_09:59:02.tar.gz',
+      'phpmyadmin-08.05.2016_13:10:02.tar.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('10.05.2016'))
+
+    files = parser.removable_files_when_keeping_in_days(0).map {|file| file[:filename] }
+
+    assert_equal 4, files.count
+    assert files.include? 'phpmyadmin-02.05.2016_08:10:02.tar.gz'
+    assert files.include? 'phpmyadmin-03.05.2016_18:00:05.tar.gz'
+    assert files.include? 'phpmyadmin-02.05.2016_09:59:02.tar.gz'
+    assert files.include? 'phpmyadmin-08.05.2016_13:10:02.tar.gz'
+  end
+
+  def test_removed_files_days_ago_all_but_today
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'phpmyadmin-02.05.2016_08:10:02.tar.gz',
+      'phpmyadmin-03.05.2016_18:00:05.tar.gz',
+      'phpmyadmin-02.05.2016_09:59:02.tar.gz',
+      'phpmyadmin-08.05.2016_13:10:02.tar.gz',
+      'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('10.05.2016'))
+
+    files = parser.removable_files_when_keeping_in_days(0).map {|file| file[:filename] }
+
+    assert_equal 4, files.count
+    assert files.include? 'phpmyadmin-02.05.2016_08:10:02.tar.gz'
+    assert files.include? 'phpmyadmin-03.05.2016_18:00:05.tar.gz'
+    assert files.include? 'phpmyadmin-02.05.2016_09:59:02.tar.gz'
+    assert files.include? 'phpmyadmin-08.05.2016_13:10:02.tar.gz'
+  end
+
+  def test_removed_files_days_ago_some_left
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'phpmyadmin-02.05.2016_08:10:02.tar.gz',
+      'phpmyadmin-03.05.2016_18:00:05.tar.gz',
+      'phpmyadmin-02.05.2016_09:59:02.tar.gz',
+      'phpmyadmin-08.05.2016_13:10:02.tar.gz',
+      'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('10.05.2016'))
+
+    files = parser.removable_files_when_keeping_in_days(3).map {|file| file[:filename] }
+
+    assert_equal 3, files.count
+    assert files.include? 'phpmyadmin-02.05.2016_08:10:02.tar.gz'
+    assert files.include? 'phpmyadmin-03.05.2016_18:00:05.tar.gz'
+    assert files.include? 'phpmyadmin-02.05.2016_09:59:02.tar.gz'
+  end
 end

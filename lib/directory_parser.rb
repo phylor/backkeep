@@ -43,5 +43,13 @@ class DirectoryParser
 
     days_ago_files
   end
+
+  def remove_and_keep_days_ago(days)
+    removable_files_when_keeping_in_days(days).map {|file| File.delete(File.join(@directory, file[:filename])) }
+  end
+
+  def removable_files_when_keeping_in_days(days)
+    files - days_ago(days)
+  end
 end
 
