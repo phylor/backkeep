@@ -40,7 +40,11 @@ class DirectoryParser
         files.push({
           :filename => item,
           :date => save_date,
-          :age_in_days => age_in_days(save_date)
+          :age_in_days => age_in_days(save_date),
+          :year => save_date.year,
+          :month => "#{save_date.year}#{save_date.month}",
+          :week => "#{save_date.year}#{save_date.cweek}",
+          :day => "#{save_date.year}#{save_date.cweek}#{save_date.cwday}"
         })
       rescue
         next
@@ -55,7 +59,15 @@ class DirectoryParser
   end
 
   def days_ago(days, lastin=nil)
-    files.select { |file| file[:age_in_days] <= days }
+    lastin_items = []
+
+    if lastin
+      files.map { |file| file[lastin] }.uniq.each do |value|
+        lastin_items << files.select { |file| file[lastin] == value }.max { |a, b| a[:date] <=> b[:date] }
+      end
+    end
+
+    (files.select { |file| file[:age_in_days] <= days } + lastin_items).uniq
   end
 
   def remove_and_keep_days_ago(days)

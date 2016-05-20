@@ -41,6 +41,10 @@ commands = {
     opts.on('-k', '--keep [TEXT]', 'Days to keep backups around') do |days|
       options[:keep_in_days] = days.to_i
     end
+
+    opts.on('-l', '--last-in [TEXT]', 'Keep last backup of every year, month, week or day') do |lastin|
+      options[:lastin] = lastin
+    end
   end,
   'diff' => OptionParser.new do |opts|
     opts.banner = 'Usage: diff [OPTIONS]'
@@ -51,6 +55,10 @@ commands = {
 
     opts.on('-k', '--keep [TEXT]', 'Days to keep backups around') do |days|
       options[:keep_in_days] = days.to_i
+    end
+
+    opts.on('-l', '--last-in [TEXT]', 'Keep last backup of every year, month, week or day') do |lastin|
+      options[:lastin] = lastin
     end
   end,
   'remove' => OptionParser.new do |opts|
@@ -66,6 +74,10 @@ commands = {
 
     opts.on('-k', '--keep [TEXT]', 'Days to keep backups around') do |days|
       options[:keep_in_days] = days.to_i
+    end
+
+    opts.on('-l', '--last-in [TEXT]', 'Keep last backup of every year, month, week or day') do |lastin|
+      options[:lastin] = lastin.to_sym
     end
   end
 }

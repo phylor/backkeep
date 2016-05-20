@@ -375,4 +375,85 @@ class DirectoryParserTest < Minitest::Test
 
     assert_equal 699, parser.removable_files_when_keeping_in_days(6).count
   end
+
+  def test_days_ago_with_lastin_and_months
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'phpmyadmin-02.03.2016_08:10:02.tar.gz',
+      'phpmyadmin-12.03.2016_08:10:02.tar.gz',
+      'phpmyadmin-02.04.2016_08:10:02.tar.gz',
+      'phpmyadmin-03.04.2016_18:00:05.tar.gz',
+      'phpmyadmin-02.05.2016_09:59:02.tar.gz',
+      'phpmyadmin-08.05.2016_13:10:02.tar.gz',
+      'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('10.05.2016'))
+
+    files = parser.days_ago(0, :month)
+
+    assert_equal 3, files.count
+    assert files.map { |file| file[:filename] }.include? 'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+    assert files.map { |file| file[:filename] }.include? 'phpmyadmin-03.04.2016_18:00:05.tar.gz'
+    assert files.map { |file| file[:filename] }.include? 'phpmyadmin-12.03.2016_08:10:02.tar.gz'
+  end
+
+  def test_days_ago_with_lastin_and_years
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'phpmyadmin-02.03.2013_08:10:02.tar.gz',
+      'phpmyadmin-01.01.2015_08:10:02.tar.gz',
+      'phpmyadmin-01.03.2015_08:10:02.tar.gz',
+      'phpmyadmin-02.03.2015_08:10:02.tar.gz',
+      'phpmyadmin-02.03.2016_08:10:02.tar.gz',
+      'phpmyadmin-12.03.2016_08:10:02.tar.gz',
+      'phpmyadmin-02.04.2016_08:10:02.tar.gz',
+      'phpmyadmin-03.04.2016_18:00:05.tar.gz',
+      'phpmyadmin-02.05.2016_09:59:02.tar.gz',
+      'phpmyadmin-08.05.2016_13:10:02.tar.gz',
+      'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('10.05.2016'))
+
+    files = parser.days_ago(0, :year)
+
+    assert_equal 3, files.count
+    assert files.map { |file| file[:filename] }.include? 'phpmyadmin-02.03.2013_08:10:02.tar.gz'
+    assert files.map { |file| file[:filename] }.include? 'phpmyadmin-02.03.2015_08:10:02.tar.gz'
+    assert files.map { |file| file[:filename] }.include? 'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+  end
+
+  def test_days_ago_with_lastin_and_years_and_more_days_to_keep
+    test_directory = TestUtils.create_directory
+    TestUtils.create_files(test_directory, [
+      'phpmyadmin-02.03.2013_08:10:02.tar.gz',
+      'phpmyadmin-01.01.2015_08:10:02.tar.gz',
+      'phpmyadmin-01.03.2015_08:10:02.tar.gz',
+      'phpmyadmin-02.03.2015_08:10:02.tar.gz',
+      'phpmyadmin-02.03.2016_08:10:02.tar.gz',
+      'phpmyadmin-12.03.2016_08:10:02.tar.gz',
+      'phpmyadmin-02.04.2016_08:10:02.tar.gz',
+      'phpmyadmin-03.04.2016_18:00:05.tar.gz',
+      'phpmyadmin-02.05.2016_09:59:02.tar.gz',
+      'phpmyadmin-08.05.2016_13:10:02.tar.gz',
+      'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+    ], [
+      'phpmyadmin-README',
+      'phpmyadmin-install'
+    ])
+    parser = DirectoryParser.new(test_directory, Date.parse('10.05.2016'))
+
+    files = parser.days_ago(5, :year)
+
+    assert_equal 4, files.count
+    assert files.map { |file| file[:filename] }.include? 'phpmyadmin-02.03.2013_08:10:02.tar.gz'
+    assert files.map { |file| file[:filename] }.include? 'phpmyadmin-02.03.2015_08:10:02.tar.gz'
+    assert files.map { |file| file[:filename] }.include? 'phpmyadmin-08.05.2016_13:10:02.tar.gz'
+    assert files.map { |file| file[:filename] }.include? 'phpmyadmin-10.05.2016_13:10:02.tar.gz'
+  end
 end
