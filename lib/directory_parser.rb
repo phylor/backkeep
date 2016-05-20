@@ -54,14 +54,8 @@ class DirectoryParser
     files.count
   end
 
-  def days_ago(days)
-    days_ago_files = []
-
-    files.each do |file|
-      days_ago_files.push file if file[:age_in_days] <= days
-    end
-
-    days_ago_files
+  def days_ago(days, lastin=nil)
+    files.select { |file| file[:age_in_days] <= days }
   end
 
   def remove_and_keep_days_ago(days)
